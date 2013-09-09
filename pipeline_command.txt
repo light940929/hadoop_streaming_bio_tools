@@ -1,0 +1,84 @@
+bwa index dna_71_5000.fa
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/testdata_1.fq,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.bwt,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.rbwt \
+-input /user/hadoop/space.txt \
+-output sai1.sai \
+-mapper "/usr/local/hadoop/bwa-0.5.9/bwa aln dna_71_5000.fa testdata_1.fq"  \
+-reducer NONE
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/testdata_2.fq,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.bwt,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.rbwt \
+-input /user/hadoop/space.txt \
+-output sai2.sai \
+-mapper "/usr/local/hadoop/bwa-0.5.9/bwa aln dna_71_5000.fa testdata_2.fq" \
+-reducer NONE
+
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/testdata_1.fq,hdfs://192.168.1.198:54310/user/hadoop/testdata_2.fq,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa,hdfs://192.168.1.198:54310/user/hadoop/sai1.sai,hdfs://192.168.1.198:54310/user/hadoop/sai2.sai,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.ann,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.amb,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.pac,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.bwt,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.rbwt,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.sa,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.rsa \ 
+-input /user/hadoop/space.txt \ 
+-output aln.sam \
+-mapper "/usr/local/hadoop/bwa-0.5.9/bwa sampe dna_71_5000.fa sai1.sai sai2.sai  testdata_1.fq testdata_2.fq  " \
+-reducer NONE
+
+
+hadoop fs -getmerge aln.sam aln_m.sam && hadoop fs -put aln_m.sam aln_m.sam 
+
+
+samtools faidx  dna_71_5000.fa
+hadoop fs -put dna_71_5000.fa.fai dna_71_5000.fa.fai
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.fai,hdfs://192.168.1.198:54310/user/hadoop/aln_m.sam \
+-input /user/hadoop/space.txt \
+-output /user/hadoop/aln.bam \
+-mapper "/usr/local/hadoop/samtools-0.1.18/samtools view -bt dna_71_5000.fa.fai aln_m.sam" \
+-reducer NONE
+
+hadoop fs -getmerge aln.bam aln_m.bam && hadoop fs -put aln_m.bam aln_m.bam 
+
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa,hdfs://192.168.1.198:54310/user/hadoop/aln_m.bam \
+-input /user/hadoop/space.txt \
+-output /user/hadoop/aln.bam.sorted \
+-mapper "/usr/local/hadoop/samtools-0.1.18/samtools sort  aln_m.bam -o  aln.bam.sorted " \
+-reducer NONE 
+
+
+
+samtools rmdup aln.bam.sorted.bam aln_rmdup.bam
+
+hadoop fs -put aln.bam.sorted.bam aln.bam.sorted.bam
+
+samtools index aln_rmdup.bam 
+
+hadoop fs -put aln_rmdup.bam.bai aln_rmdup.bam.bai
+
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa,hdfs://192.168.1.198:54310/user/hadoop/aln_rmdup.bam,hdfs://192.168.1.198:54310/user/hadoop/aln_rmdup.bam.bai,hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa.fai \
+-input /user/hadoop/space.txt \
+-output /user/hadoop/aln_rmdup.tobcf \
+-mapper "/usr/local/hadoop/samtools-0.1.18/samtools mpileup -C50 -q 30 -Bugf dna_71_5000.fa aln_rmdup.bam  " \
+-reducer NONE
+
+
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/aln_rmdup.tobcf \
+-input /user/hadoop/space.txt \
+-output /user/hadoop/aln_rmdup.bcf \
+-mapper "/usr/local/hadoop/samtools-0.1.18/bcftools/bcftools view -bcvg aln_rmdup.tobcf " \
+-reducer NONE
+
+ 
+
+
+./hadoop jar /usr/local/hadoop/hadoop/contrib/streaming/hadoop-streaming-1.1.2.jar \
+-files hdfs://192.168.1.198:54310/user/hadoop/dna_71_5000.fa,hdfs://192.168.1.198:54310/user/hadoop/aln_rmdup.bcf,hdfs://192.168.1.198:54310/user/hadoop/aln_rmdup.bam.bai \
+-input /user/hadoop/space.txt \
+-output /user/hadoop/aln_rmdup.flt.vcf \
+-mapper " /usr/local/hadoop/samtools-0.1.18/bcftools/bcftools view aln_rmdup.bcf | /usr/local/hadoop/samtools-0.1.18/bcftools/vcfutils.pl varFilter  " \
+-reducer NONE
