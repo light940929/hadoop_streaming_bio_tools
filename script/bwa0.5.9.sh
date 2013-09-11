@@ -25,6 +25,10 @@ rm -rf $getData/${Species}.*
 $dna_pair_1 = testdata_1_1 
 $dna_pair_2 = testdata_2_1
 
+$dna_pair = testdata
+
+$outputsam = ${dna_pair}.sam
+
 source = http://192.168.1.198/hadoop/${dna_pair}.fastq.gz
 
 wget -p $setData/human_case   $source
@@ -40,21 +44,20 @@ touch spcace.txt|$HADOOP_HOME/bin/hadoop fs -put spcace.txt spcace.txt|rm -rf sp
 $HADOOP_HOME/bin/hadoop jar $HADOOP_JAR \
 -files hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_1.fq,hdfs://192.168.1.198:54310/user/hadoop/${Species},hdfs://192.168.1.198:54310/user/hadoop/${Species}.bwt,hdfs://192.168.1.198:54310/user/hadoop/${Species}.rbwt \
 -input /user/hadoop/space.txt \
--output sai1.sai \
--mapper "$BAM_HOME/bwa aln dna_71_5000.fa testdata_1.fq"  \
+-output $dna_pair_1.sai \
+-mapper "$BAM_HOME/bwa aln ${Species} $dna_pair_1.fq"  \
 -reducer NONE
 
 $HADOOP_HOME/bin/hadoop jar $HADOOP_JAR \
 -files hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_2.fq,hdfs://192.168.1.198:54310/user/hadoop/${Species},hdfs://192.168.1.198:54310/user/hadoop/${Species}.bwt,hdfs://192.168.1.198:54310/user/hadoop/${Species}.rbwt \
 -input /user/hadoop/space.txt \
--output sai2.sai \
--mapper "$BAM_HOME/bwa aln dna_71_5000.fa testdata_2.fq" \
+-output $dna_pair_2.sai \
+-mapper "$BAM_HOME/bwa aln ${Species} $dna_pair_2.fq" \
 -reducer NONE
 
 
 $HADOOP_HOME/bin/hadoop jar $HADOOP_JAR \
--files hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_1.fq,hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_2.fq,hdfs://192.168.1.198:54310/user/hadoop/${Species},hdfs://192.168.1.198:54310/user/hadoop/sai1.sai,hdfs://192.168.1.198:54310/user/hadoop/sai2.sai,hdfs://192.168.1.198:54310/user/hadoop/${Species}.ann,hdfs://192.168.1.198:54310/user/hadoop/${Species}amb,hdfs://192.168.1.198:54310/user/hadoop/${Species}.pac,hdfs://192.168.1.198:54310/user/hadoop/${Species}.bwt,hdfs://192.168.1.198:54310/user/hadoop/${Species}.rbwt,hdfs://192.168.1.198:54310/user/hadoop/${Species}.sa,hdfs://192.168.1.198:54310/user/hadoop/${Species}.rsa \
--input /user/hadoop/space.txt \
--output aln.sam \
--mapper "$BAM_HOME/bwa sampe ${Species} sai1.sai sai2.sai  $dna_pair_1.fq $dna_pair_2.fq  " \
+-files hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_1.fq,hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_2.fq,hdfs://192.168.1.198:54310/user/hadoop/${Species},hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_1.sai,hdfs://192.168.1.198:54310/user/hadoop/$dna_pair_2.sai,hdfs://192.168.1.198:54310/user/hadoop/${Species}.ann,hdfs://192.168.1.198:54310/user/hadoop/${Species}amb,hdfs://192.168.1.198:54310/user/hadoop/${Species}.pac,hdfs://192.168.1.198:54310/user/hadoop/${Species}.bwt,hdfs://192.168.1.198:54310/user/hadoop/${Species}.rbwt,hdfs://192.168.1.198:54310/user/hadoop/${Species}.sa,hdfs://192.168.1.198:54310/user/hadoop/${Species}.rsa \
+-output $outputsam  \
+-mapper "$BAM_HOME/bwa sampe ${Species} $dna_pair_1.sai $dna_pair_2.sai $dna_pair_1.fq $dna_pair_2.fq  " \
 -reducer NONE
