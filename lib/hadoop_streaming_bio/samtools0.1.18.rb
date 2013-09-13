@@ -58,9 +58,9 @@ class Samtools0_1_18
     -files hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup,hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup.bai,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.fai \
     -input /user/hadoop/space.txt \
     -output "/user/hadoop/#{OutBam}_m_rmdup}.tobcf"\
-    -mapper "$SAMTOOLS_HOME/samtools mpileup -C50 -q 30 -Bugf #{SPECIES} #{OutBam}_m_rmdup" \
+    -mapper " $SAMTOOLS_HOME/samtools mpileup -C50 -q 30 -Bugf #{SPECIES} #{OutBam}_m_rmdup "\
     -reducer NONE}
-  
+  s
   end
   
   def bcfg
