@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #coding :utf-8
-module BioTools
+module HadoopStringBio
   class BWA
     class Library
       

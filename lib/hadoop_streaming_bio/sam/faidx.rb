@@ -1,12 +1,12 @@
 #!/usr/bin/ruby
 #coding :utf-8
 
-module BioTools
+module HadoopStringBio
     module SAM
       module Tools
         extend FFI::Library
         #ffi_lib "#{File.join(File.expand_path(File.dirname(__FILE__)),'external','libbam.dylib')}"
-        ffi_lib BioTools::SAM::Library.filename
+        ffi_lib HadoopStringBio::SAM::Library.filename
 
         attach_function :fai_build, [ :string ], :int
         attach_function :fai_destroy, [ :pointer ], :void

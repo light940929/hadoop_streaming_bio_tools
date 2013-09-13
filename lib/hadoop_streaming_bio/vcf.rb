@@ -5,7 +5,7 @@
 # Forked from vcfruby at https://github.com/jesserod/vcfruby 
 # Modified and tests written by Dan MacLean (dan.maclean@tsl.ac.uk)
 # VCF is described at http://www.1000genomes.org/node/101
-module BioTools
+module HadoopStringBio
 
 class Vcf
 public

@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 #coding :utf-8
 
-module BioTools
+module HadoopStringBio
     module SAM
       module Tools
         extend FFI::Library

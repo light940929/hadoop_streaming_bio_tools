@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 #coding :utf-8
 
-module BioTools
+module HadoopStringBio
     module SAM
       module Library
         #IMPORTANT NOTE: Windows library is missing in this distribution

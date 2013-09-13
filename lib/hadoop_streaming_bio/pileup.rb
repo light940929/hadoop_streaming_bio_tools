@@ -27,7 +27,7 @@
 # Pileup provides accessors for all columns (6 or 10 column format) and a few other useful methods
 # 
 # 
-module BioTools
+module HadoopStringBio
  
 class Pileup
   attr_accessor :ref_name, :pos, :ref_base, :coverage, :read_bases, :read_quals, :consensus, :consensus_quality, :snp_quality, :rms_mapq, :ar1, :ar2, :ar3, :indel_1, :indel_2

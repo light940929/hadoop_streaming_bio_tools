@@ -1,10 +1,10 @@
 #!/usr/bin/ruby
 #coding :utf-8
 
-require 'BioTools/sam/library'
-require 'BioTools/sam/bam'
-require 'BioTools/sam/faidx'
-require 'BioTools/sam/sam'
+require 'HadoopStringBio/sam/library'
+require 'HadoopStringBio/sam/bam'
+require 'HadoopStringBio/sam/faidx'
+require 'HadoopStringBio/sam/sam'
 require 'systemu'
 
 module LibC

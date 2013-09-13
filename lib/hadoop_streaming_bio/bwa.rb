@@ -2,12 +2,12 @@
 #coding :utf-8
 #@author Francesco Strozzi https://github.com/fstrozzi
 
-module BioTools
+module HadoopStringBio
   
    class BWA
   
       extend FFI::Library
-      ffi_lib BioTools::BWA::Library.load
+      ffi_lib HadoopStringBio::BWA::Library.load
       
       # Convert a Fasta to Packed format
       # @param [Hash]. params Options.
