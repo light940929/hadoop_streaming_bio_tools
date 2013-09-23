@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #coding :utf-8
-require 'open3'
+#require 'open3'
 
 class  BWA0_5_9
  

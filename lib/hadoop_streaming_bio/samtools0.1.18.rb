@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #coding :utf-8
-require 'open3'
+#require 'open3'
 
 class Samtools0_1_18
   
@@ -65,7 +65,7 @@ class Samtools0_1_18
   
   end
   
-  def bcfg
+  def bcvg
   
     %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
     -files hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup.tobcf \
