@@ -36,8 +36,7 @@ class  BWA0_5_9
   
   end
   
-  def align
-    
+  def pre_process
     setData = '~/Data/setData/human_case'  
     #system "mkdir -p #{setData}|wget -p #{setData}/human_case   #{Source1}"
     #system "mkdir -p #{setData}|cd #{setData} | wget  #{Source1}"
@@ -46,7 +45,9 @@ class  BWA0_5_9
     %x{$HADOOP_HOME/bin/hadoop fs -put  #{setData}/#{Data_Pair_1}.fq  #{Data_Pair_1}.fq}
     %x{$HADOOP_HOME/bin/hadoop fs -put  #{setData}/#{Data_Pair_2}.fq  #{Data_Pair_2}.fq}
     system "touch spcace.txt|$HADOOP_HOME/bin/hadoop fs -put spcace.txt space.txt|rm -rf space.txt"
-    
+  end
+  
+  def aln_pair
     %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
     -files hdfs://192.168.1.198:54310/user/hadoop/#{Data_Pair_1}.fq,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.bwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rbwt  \
     -input /user/hadoop/space.txt \
@@ -60,16 +61,42 @@ class  BWA0_5_9
     -output "#{Data_Pair_2}.sai" \
     -mapper "$BAM_HOME/bwa aln #{SPECIES} #{Data_Pair_2}.fq"  \
     -reducer NONE}
-    
-
+  end
+  
+  def sampe
     %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
     -files hdfs://192.168.1.198:54310/user/hadoop/#{Data_Pair_1}.fq,hdfs://192.168.1.198:54310/user/hadoop/#{Data_Pair_2}.fq,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{Data_Pair_1}.sai,hdfs://192.168.1.198:54310/user/hadoop/#{Data_Pair_2}.sai,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.ann,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.amb,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.pac,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.bwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rbwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.sa,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rsa \
     -input  /user/hadoop/space.txt \
     -output "#{OutSam}"  \
     -mapper "$BAM_HOME/bwa sampe #{SPECIES} #{Data_Pair_1}.sai #{Data_Pair_2}.sai #{Data_Pair_1}.fq #{Data_Pair_2}.fq  " \
     -reducer NONE}
-  
-    
   end
   
+  def aln_short
+    %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
+    -files hdfs://192.168.1.198:54310/user/hadoop/#{Data}.fq,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.bwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rbwt  \
+    -input /user/hadoop/space.txt \
+    -output "#{Data}.sai" \
+    -mapper "$BAM_HOME/bwa aln #{SPECIES} #{Data}.fq"  \
+    -reducer NONE}
+  end
+
+  def samse
+    %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
+    -files hdfs://192.168.1.198:54310/user/hadoop/#{Data}.fq,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{Data}.sai,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.ann,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.amb,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.pac,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.bwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rbwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.sa,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rsa \
+    -input  /user/hadoop/space.txt \
+    -output "#{OutSam}_test"  \
+    -mapper "$BAM_HOME/bwa samse #{SPECIES} #{Data}.sai ##{Data}.fq  " \
+    -reducer NONE}
+  end 
+
+  def bwasw
+    %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
+    -files hdfs://192.168.1.198:54310/user/hadoop/#{Data}.fq,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{Data}.sai,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.ann,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.amb,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.pac,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.bwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rbwt,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.sa,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.rsa \
+    -input  /user/hadoop/space.txt \
+    -output "#{OutSam}_test_2"  \
+    -mapper "$BAM_HOME/bwa bwasw #{SPECIES} #{Data}.sai ##{Data}.fq  " \
+    -reducer NONE}
+  end
+
 end

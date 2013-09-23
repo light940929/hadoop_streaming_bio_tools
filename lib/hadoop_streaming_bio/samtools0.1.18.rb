@@ -16,16 +16,16 @@ class Samtools0_1_18
   
   
   def faidx
-    system "$SAMTOOLS_HOME/samtools faidx  #{SPECIES}"
+    %x{$SAMTOOLS_HOME/samtools faidx  #{SPECIES}}
     %x{$HADOOP_HOME/bin/hadoop fs -put #{SPECIES}.fai #{SPECIES}.fai | rm -rf #{SPECIES}.fai}
   end
    
   def toSam
     %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
-    -files hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.fai,hdfs://192.168.1.198:54310/user/hadoop/#{OutSam}_m \
+    -files hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.fai,hdfs://192.168.1.198:54310/user/hadoop/#{OutSam}_m\
     -input /user/hadoop/space.txt \
     -output "/user/hadoop/#{OutBam}" \
-    -mapper "$SAMTOOLS_HOME/samtools view -bt #{SPECIES}.fai #{OutSam}_m  \
+    -mapper "$SAMTOOLS_HOME/samtools view -bt #{SPECIES}.fai #{OutSam}_m " \
     -reducer NONE}
   end
   
@@ -42,8 +42,10 @@ class Samtools0_1_18
     -reducer NONE}
   end
   
-  def rmdup 
-    %x{$SAMTOOLS_HOME/samtools rmdup #{OutBam}_m.sorted.bam #{OutBam}_m_rmdup}
+  def rmdup
+    %x{$HADOOP_HOME/bin/hadoop fs -getmerge #{OutBam}_m.sorted #{OutBam}_m.sorted }
+    %x{$SAMTOOLS_HOME/samtools rmdup #{OutBam}_m.sorted #{OutBam}_m_rmdup}
+    ##[bam_header_read] EOF marker is absent. The input is probably truncated. why?
     %x{$HADOOP_HOME/bin/hadoop fs -put #{OutBam}_m_rmdup #{OutBam}_m_rmdup}
   end
   
@@ -57,20 +59,20 @@ class Samtools0_1_18
     %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
     -files hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup,hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup.bai,hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES}.fai \
     -input /user/hadoop/space.txt \
-    -output "/user/hadoop/#{OutBam}_m_rmdup}.tobcf"\
-    -mapper " $SAMTOOLS_HOME/samtools mpileup -C50 -q 30 -Bugf #{SPECIES} #{OutBam}_m_rmdup "\
-    -reducer NONE}
-  s
+    -output "/user/hadoop/#{OutBam}_m_rmdup.tobcf"\
+    -mapper "$SAMTOOLS_HOME/samtools mpileup -C50 -q 30 -Bugf #{SPECIES} #{OutBam}_m_rmdup" \
+    -reducer NONE }
+  
   end
   
   def bcfg
   
     %x{$HADOOP_HOME/bin/hadoop jar #{HADOOP_JAR} \
-    -files hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup}.tobcf \
+    -files hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup.tobcf \
     -input /user/hadoop/space.txt \
     -output "/user/hadoop/#{OutBam}_m_rmdup.bcf" \
-    -mapper "$BCFTOOLS/bcftools view -bcvg #{OutBam}_m_rmdup}.tobcf " \
-    -reducer NONE}
+    -mapper "$BCFTOOLS/bcftools view -bcvg #{OutBam}_m_rmdup.tobcf " \
+    -reducer NONE }
   
   end
   
@@ -80,7 +82,7 @@ class Samtools0_1_18
     -files hdfs://192.168.1.198:54310/user/hadoop/#{SPECIES},hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup.bcf,hdfs://192.168.1.198:54310/user/hadoop/#{OutBam}_m_rmdup.bai \
     -input /user/hadoop/space.txt \
     -output "/user/hadoop/#{OutBam}_m_rmdup.flt.vcf" \
-    -mapper " $BCFTOOLS/bcftools view #{OutBam}_m_rmdup.bcf | $BCFTOOLS/vcfutils.pl varFilter  " \
+    -mapper "$BCFTOOLS/bcftools view #{OutBam}_m_rmdup.bcf | $BCFTOOLS/vcfutils.pl varFilter  " \
     -reducer NONE}
   
   end
